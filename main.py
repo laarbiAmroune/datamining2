@@ -2,36 +2,28 @@ import pandas as pd
 from src.modal import *
 
 # Load data.
-train_size = 100
+depth = 8
+
+train_percentage = 0.8
 df = pd.read_csv("diabetes.csv", delimiter=",")
 features = list(df.keys())[:-1]
 data = df.to_numpy()
-X = data[:, :-1] # all columns but the last
-y = data[:, -1].astype(int) # expected to be from 0 to n_classes - 1
-# Fit data.
-print(data[:1, :-1]**2)
-print(X.shape, y.shape)
-clf = DTree(max_depth = 10)
-clf.meta_data(feature_names = features, class_names = ['no diabetes', 'diabetes'])
-clf.fit(X, y)
-#print(clf.predict(data[10:30,:-1]))
-#print(list(y[10:30]))
-print(np.sum((y-clf.predict(data[:,:-1]))**2)/len(y))
-'''
-print('x shape= ', X.shape)
-clf = DTree(max_depth=2)
-clf.fit(X, y)
 
-# Visualize.
-clf.debug(
-    feature_names=features,
-    class_names=["d 0", "d 1"],
-)
-#'''
-'''
-print("-----------------------------------------------------")
-print(clf.predict([X[3]]))
-print(clf.predict([X[3]]))
-print(clf.predict([X[0]]))
-print(clf.predict([X[20]]))
-'''
+X_train = data[:int(data.shape[0]*train_percentage), :-1]
+y_train= data[:int(data.shape[0]*train_percentage), -1].astype(int)
+
+X_test = data[int(data.shape[0]*train_percentage) :, :-1]
+y_test = data[int(data.shape[0]*train_percentage) :, -1].astype(int)
+
+# Fit data.
+clf = Dicision_tree(max_depth = depth)
+clf.meta_data(feature_names = features, class_names = ['no diabetes', 'diabetes'])
+clf.fit(X_train, y_train)
+
+print("prediction dans l'ensemble de test\n",clf.predict(X_test))
+print("erreur sur l'ensemble d'entrainement:", np.sum((y_train-clf.predict(X_train))**2)/len(y_train) )
+print("erreur quadratique de l'ensemble de test:",np.sum((y_test-clf.predict(X_test))**2)/len(y_test))
+
+print("\n\n\n")
+print("affichage de l'arbre sous forme de regles")
+clf.console_viz()

@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 from src.node import *
 
-class DTree :
+class Dicision_tree :
     def __init__(self, max_depth=None, load_path = None):
         #if given file loading path
         if load_path != None :
@@ -17,13 +17,9 @@ class DTree :
 
     #save modal into file
     def _save(self, save_path: str):
-         with open(load_path, 'wb') as modal:
+         with open(save_path, 'wb') as modal:
             pickle.dump(self._root, modal)
     
-    def debug(self, feature_names, class_names, show_details=True):
-        """#print ASCII visualization of decision tree."""
-        self._root.debug(feature_names, class_names, show_details)
-
     def _optimal_split(self, X, y):
         # Need at least two elements to split a node.
         nb_samples = y.size
@@ -52,7 +48,6 @@ class DTree :
                 c = int(classes[i - 1])
                 num_left[c] += 1
                 num_right[c] -= 1
-                ##print(idx, i, c,num_left[c],num_right[c])
                 gini_left = 1.0 - sum(
                     (num_left[x] / i) ** 2 for x in range(self._nb_classes)
                 )
@@ -87,7 +82,7 @@ class DTree :
         nb_samples = len(labels)
 
         for feature_ in range(self._nb_features):
-            print(self.feature_names[feature_])
+            #print(self.feature_names[feature_])
             #maching feature_ and labels
             ##print("features", features)
             ##print("labels", labels)
@@ -147,41 +142,11 @@ class DTree :
 
 
 
-    def _fit(self, X, y):
-        self._nb_classes = len(set(y))
-        self._nb_features = X.shape[1]
-        self._root = self._grow_tree(X, y)
 
     def fit(self, features, labels):
         self._nb_classes =len(set(labels))
         self._nb_features = features.shape[1]
         self._root = self.construct_tree(features, labels)
-
-    def _grow_tree(self, X, y, depth=0):
-        """Build a decision tree by recursively finding the best split."""
-        # Population for each class in current node. The predicted class is the one with
-        # largest population.
-        num_samples_per_class = [np.sum(y == i) for i in range(self._nb_classes)]
-        predicted_class = np.argmax(num_samples_per_class)
-        node = Node(
-            gini=self._gini(y),
-            num_samples=y.size,
-            num_samples_per_class=num_samples_per_class,
-            predicted_class=predicted_class,
-        )
-
-        # Split recursively until maximum depth is reached.
-        if depth < self.max_depth:
-            idx, thr = self._optimal_split(X, y)
-            if idx is not None:
-                indices_left = X[:, idx] < thr
-                X_left, y_left = X[indices_left], y[indices_left]
-                X_right, y_right = X[~indices_left], y[~indices_left]
-                node.feature_index = idx
-                node.threshold = thr
-                node.left = self._grow_tree(X_left, y_left, depth + 1)
-                node.right = self._grow_tree(X_right, y_right, depth + 1)
-        return node
 
     
     def predict(self, X):
@@ -189,11 +154,11 @@ class DTree :
 
     def _predict(self, inputs):
         """Predict class for a single sample."""
-        print("prediction", inputs)
+        #print("prediction", inputs)
         node = self._root
         while not node.leaf:
             #print(node.leaf)
-            print(node.feature_name," = ", node.value)
+            #print(node.feature_name," = ", node.value)
             if inputs[node.feature_index] < node.value:
                 node = node.left_child
             else:
@@ -246,7 +211,7 @@ class DTree :
             features_right = sorted_features[split['size']:,:]
             labels_right = sorted_labels[split['size']:]
             #print(features_left.shape, features_right.shape, split['size'])
-            print(split)
+            #print(split)
             node._children(left_child = self.construct_tree(features_left, labels_left, depth = depth + 1),
                 right_child = self.construct_tree(features_right, labels_right, depth = depth + 1)
             )
@@ -258,14 +223,5 @@ class DTree :
             node._leaf(predicted_class = _class, predicted_class_name = self.class_names[_class], nb_samples = len(labels))
             return node
         
-'''     
-    def predict(self, samples):
-        pass
-    
-    def predict_sample(self, sample):
-        pass
-
-    def gini(self, data):
-        pass
-'''
-    
+    def console_viz (self):
+        self._root.console_viz()
